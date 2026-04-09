@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist-*/
+cdk.out/
+*.js.map
+
+# CDK
+cdk.context.json
+
+# Environment (local secrets only; .env.dev and .env.prod are safe to commit)
+.env.local
+.env.*.local
+
+# Agent scratch space
+.local/
+
+# OS and editor
+.DS_Store
+*.log
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# TypeScript incremental
+*.tsbuildinfo

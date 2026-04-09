@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx cdk:*)",
+      "Bash(aws s3:*)",
+      "Bash(aws cloudfront:*)",
+      "Bash(aws cloudformation:*)",
+      "Bash(aws sts:*)",
+      "Bash(aws ssm:*)",
+      "Bash(git:*)",
+      "Bash(mkdir:*)",
+      "Bash(cp:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)"
+    ]
+  }
+}
