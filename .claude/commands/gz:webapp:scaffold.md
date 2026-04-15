@@ -49,7 +49,7 @@ Lambda Handlers:
   - lambda/{resource}/handler.ts (handles the above routes)
 
 DynamoDB Tables:
-  - {stage}{AppPascal}{TableName} (partition key: {pk})
+  - gzweb-{stage}-{app}-{TableName} (partition key: {pk})
 
 Other Changes:
   - Update webapp/src/App.tsx with new route
@@ -85,7 +85,7 @@ Follow these conventions when creating files:
 
 ### CDK Changes (`cdk/lib/*-stack.ts`)
 - New DynamoDB tables: `PAY_PER_REQUEST` billing, `RETAIN` removal policy, `pointInTimeRecovery: true`
-- Table names: `${stage}{{APP_NAME_PASCAL}}{TableName}` (use the same pattern as AppUserTable)
+- Table names: `gzweb-${stage}-{{APP_NAME}}-{TableName}` (use the same namespaced pattern as AppUserTable; the stack's `cdk.Tags.of(this).add()` call will propagate `gz:namespace=gzweb` tags automatically)
 - New Lambda functions: use `NodejsFunction` with the same config pattern as existing functions
 - Grant table permissions: `table.grantReadWriteData(fn)`
 - Add SSM permissions if the function needs secrets

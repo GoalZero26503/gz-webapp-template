@@ -39,8 +39,8 @@ if [ -z "$PROFILE" ]; then
   exit 1
 fi
 
-BUCKET="${STAGE}-${APP_NAME}-webapp"
-STACK_NAME="${APP_NAME_PASCAL}-${STAGE}"
+BUCKET="gzweb-${STAGE}-${APP_NAME}-webapp"
+STACK_NAME="GzWeb-${APP_NAME_PASCAL}-${STAGE}"
 
 # Verify AWS credentials
 echo "Verifying AWS credentials for profile '$PROFILE'..."

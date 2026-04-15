@@ -11,3 +11,4 @@ Technical reference docs for AI agents working in this project. These are more d
 | [api.md](api.md) | API route reference: endpoints, request/response formats, how to add new routes |
 | [deploy.md](deploy.md) | Deployment reference: AWS accounts, CDK context, deploy steps, first-deploy checklist |
 | [conventions.md](conventions.md) | Code conventions: naming, Lambda patterns, DynamoDB, CSS, imports, environment detection |
+| [aws-namespace.md](aws-namespace.md) | AWS namespace (`gzweb`): resource naming, required tags, IAM access model, onboarding |

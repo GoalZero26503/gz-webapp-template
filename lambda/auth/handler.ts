@@ -24,8 +24,8 @@ async function getGoogleCredentials() {
   if (googleClientId && googleClientSecret) return { googleClientId, googleClientSecret };
   const stage = process.env.STAGE || 'dev';
   const [idResult, secretResult] = await Promise.all([
-    ssm.send(new GetParameterCommand({ Name: `/{{APP_NAME}}/${stage}/google_client_id`, WithDecryption: false })),
-    ssm.send(new GetParameterCommand({ Name: `/{{APP_NAME}}/${stage}/google_client_secret`, WithDecryption: true })),
+    ssm.send(new GetParameterCommand({ Name: `/gzweb/{{APP_NAME}}/${stage}/google_client_id`, WithDecryption: false })),
+    ssm.send(new GetParameterCommand({ Name: `/gzweb/{{APP_NAME}}/${stage}/google_client_secret`, WithDecryption: true })),
   ]);
   googleClientId = idResult.Parameter!.Value!;
   googleClientSecret = secretResult.Parameter!.Value!;

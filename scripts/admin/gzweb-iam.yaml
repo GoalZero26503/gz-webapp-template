@@ -1,0 +1,134 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'GZ webapp developers IAM group and managed policy (gzweb namespace). Deploy once per AWS account.'
+
+Resources:
+
+  GzWebappDevelopersGroup:
+    Type: AWS::IAM::Group
+    Properties:
+      GroupName: GzWebappDevelopers
+
+  GzWebappDeployPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: GzWebappDeployAccess
+      Description: 'Allows deploying internal webapps via CDK and CLI. Resource access scoped to the gzweb-* namespace.'
+      Groups:
+        - !Ref GzWebappDevelopersGroup
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+
+          # ── CDK Bootstrap Role Assumption ──────────────────────────────
+          # Required for `cdk deploy`. The CDK execution role handles
+          # actual resource creation; this just lets the CLI assume it.
+          - Sid: CDKBootstrapRoles
+            Effect: Allow
+            Action: sts:AssumeRole
+            Resource:
+              - !Sub arn:aws:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-us-east-1
+              - !Sub arn:aws:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-us-east-1
+              - !Sub arn:aws:iam::${AWS::AccountId}:role/cdk-hnb659fds-lookup-role-${AWS::AccountId}-us-east-1
+              - !Sub arn:aws:iam::${AWS::AccountId}:role/cdk-hnb659fds-image-publishing-role-${AWS::AccountId}-us-east-1
+
+          # ── S3: Webapp Static Assets ───────────────────────────────────
+          # Sync built webapp files to S3. Scoped to gzweb-* buckets only.
+          - Sid: S3WebappBuckets
+            Effect: Allow
+            Action:
+              - s3:PutObject
+              - s3:GetObject
+              - s3:DeleteObject
+              - s3:ListBucket
+            Resource:
+              - arn:aws:s3:::gzweb-*
+              - arn:aws:s3:::gzweb-*/*
+
+          # ── CloudFront: Cache Invalidation ─────────────────────────────
+          # Only allowed on distributions tagged with gz:namespace=gzweb.
+          - Sid: CloudFrontInvalidation
+            Effect: Allow
+            Action: cloudfront:CreateInvalidation
+            Resource: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/*
+            Condition:
+              StringEquals:
+                aws:ResourceTag/gz:namespace: gzweb
+
+          # ── CloudFront: Read-only ──────────────────────────────────────
+          # Needed for deploy scripts to check invalidation status.
+          # Read-only; no write risk.
+          - Sid: CloudFrontReadOnly
+            Effect: Allow
+            Action:
+              - cloudfront:GetDistribution
+              - cloudfront:GetInvalidation
+              - cloudfront:ListInvalidations
+            Resource: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/*
+
+          # ── SSM: Parameter Store ───────────────────────────────────────
+          # Read/write scoped to /gzweb/* prefix.
+          # Used for OAuth credentials, JWT secrets, and app config.
+          - Sid: SSMParameters
+            Effect: Allow
+            Action:
+              - ssm:PutParameter
+              - ssm:GetParameter
+              - ssm:GetParameters
+              - ssm:GetParametersByPath
+              - ssm:DeleteParameter
+              - ssm:DescribeParameters
+            Resource: !Sub arn:aws:ssm:us-east-1:${AWS::AccountId}:parameter/gzweb/*
+
+          # ── KMS: SecureString Support ──────────────────────────────────
+          # Required for SSM SecureString parameters (encrypted at rest).
+          # The kms:ViaService condition ensures these KMS permissions
+          # can ONLY be used through SSM, not for any other KMS operation.
+          - Sid: KMSForSSM
+            Effect: Allow
+            Action:
+              - kms:GenerateDataKey
+              - kms:Decrypt
+            Resource: '*'
+            Condition:
+              StringEquals:
+                kms:ViaService: !Sub ssm.us-east-1.amazonaws.com
+
+          # ── CloudFormation: Read Stack Outputs ─────────────────────────
+          # Deploy scripts read stack outputs (API URL, bucket name, etc.)
+          # Scoped to GzWeb-* stacks.
+          - Sid: CloudFormationDescribe
+            Effect: Allow
+            Action:
+              - cloudformation:DescribeStacks
+              - cloudformation:DescribeStackEvents
+            Resource: !Sub arn:aws:cloudformation:us-east-1:${AWS::AccountId}:stack/GzWeb-*/*
+
+          # ListStacks doesn't support resource-level permissions.
+          # Read-only; returns stack names and statuses.
+          - Sid: CloudFormationList
+            Effect: Allow
+            Action: cloudformation:ListStacks
+            Resource: '*'
+
+          # ── DynamoDB: Read-only for Debugging ──────────────────────────
+          # CDK handles table creation. Direct access is for debugging only.
+          # Scoped to gzweb-* tables.
+          - Sid: DynamoDBReadOnly
+            Effect: Allow
+            Action:
+              - dynamodb:DescribeTable
+              - dynamodb:GetItem
+              - dynamodb:Query
+              - dynamodb:Scan
+              - dynamodb:BatchGetItem
+            Resource:
+              - !Sub arn:aws:dynamodb:us-east-1:${AWS::AccountId}:table/gzweb-*
+              - !Sub arn:aws:dynamodb:us-east-1:${AWS::AccountId}:table/gzweb-*/index/*
+
+Outputs:
+  GroupName:
+    Description: IAM group name. Add webapp developers to this group.
+    Value: !Ref GzWebappDevelopersGroup
+  PolicyArn:
+    Description: Managed policy ARN attached to the group.
+    Value: !Ref GzWebappDeployPolicy

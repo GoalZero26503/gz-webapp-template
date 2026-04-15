@@ -52,7 +52,7 @@ If missing, recommend running `npm install` in that directory.
 Only attempt this if AWS credentials are likely available. Run `aws sts get-caller-identity --profile gz-dev 2>/dev/null`.
 
 If credentials work, for each environment that has an `.env.{env}` file:
-- Check CloudFormation stack status: `aws cloudformation describe-stacks --stack-name {PascalName}-{env} --profile gz-{env} --region us-east-1`
+- Check CloudFormation stack status: `aws cloudformation describe-stacks --stack-name GzWeb-{PascalName}-{env} --profile gz-{env} --region us-east-1`
 - Report: stack status (CREATE_COMPLETE, UPDATE_COMPLETE, etc.), last updated time, and key outputs (API URL, CloudFront domain)
 
 If credentials fail, skip this section with a note: "AWS credentials not available. Run `aws sso login --profile gz-dev` to enable deployment status."

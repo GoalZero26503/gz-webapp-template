@@ -38,7 +38,7 @@ interface AppJwtPayload {
 
 - Token lifetime: 7 days (604800 seconds)
 - Algorithm: HMAC-SHA256
-- Secret: stored in SSM Parameter Store at `/{app-name}/{stage}/jwt_secret`
+- Secret: stored in SSM Parameter Store at `/gzweb/{app-name}/{stage}/jwt_secret`
 - The secret is cached in the Lambda's module scope after first fetch
 
 ## RBAC: Roles and Permissions
@@ -115,9 +115,9 @@ New users are invited via `POST /portal/users` by an admin with `portal:user:inv
 
 | Parameter | Path | Type | Description |
 |-----------|------|------|-------------|
-| Google Client ID | `/{app-name}/{stage}/google_client_id` | String | OAuth client ID from Google Cloud Console |
-| Google Client Secret | `/{app-name}/{stage}/google_client_secret` | SecureString | OAuth client secret (encrypted) |
-| JWT Secret | `/{app-name}/{stage}/jwt_secret` | SecureString | HMAC key for signing JWTs |
+| Google Client ID | `/gzweb/{app-name}/{stage}/google_client_id` | String | OAuth client ID from Google Cloud Console |
+| Google Client Secret | `/gzweb/{app-name}/{stage}/google_client_secret` | SecureString | OAuth client secret (encrypted) |
+| JWT Secret | `/gzweb/{app-name}/{stage}/jwt_secret` | SecureString | HMAC key for signing JWTs |
 
 These must be created manually before the first deploy. See `docs/setup.md` for the exact commands.
 

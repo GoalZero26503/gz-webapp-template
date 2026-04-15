@@ -165,10 +165,13 @@ Next steps:
 1. Set up Google OAuth credentials (if not done yet)
    - See docs/setup.md for the full walkthrough
 
-2. Create SSM parameters for each environment:
-   aws ssm put-parameter --name "/{app-name}/dev/google_client_id" --value "YOUR_CLIENT_ID" --type String --profile gz-dev
-   aws ssm put-parameter --name "/{app-name}/dev/google_client_secret" --value "YOUR_SECRET" --type SecureString --profile gz-dev
-   aws ssm put-parameter --name "/{app-name}/dev/jwt_secret" --value "$(openssl rand -base64 32)" --type SecureString --profile gz-dev
+2. Create SSM parameters for each environment (all paths use the `/gzweb/` namespace prefix):
+   aws ssm put-parameter --name "/gzweb/{app-name}/dev/google_client_id" --value "YOUR_CLIENT_ID" --type String --profile gz-dev
+   aws ssm put-parameter --name "/gzweb/{app-name}/dev/google_client_secret" --value "YOUR_SECRET" --type SecureString --profile gz-dev
+   aws ssm put-parameter --name "/gzweb/{app-name}/dev/jwt_secret" --value "$(openssl rand -base64 32)" --type SecureString --profile gz-dev
+
+   NOTE: If you get an AccessDenied error, your IAM user may not be in the GzWebappDevelopers group.
+   Ask an AWS admin to run: ./scripts/admin/setup-iam.sh --profile gz-{env} --add-user {your-iam-username}
 
 3. Deploy to dev:
    /gz:webapp:deploy dev

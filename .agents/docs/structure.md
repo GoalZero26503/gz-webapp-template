@@ -98,13 +98,14 @@ cdk/
     └── app-stack.ts             Main stack (DDB, Lambda, API GW, S3, CloudFront)
 ```
 
-Resources created per environment (stage):
-- **DynamoDB Table**: `{stage}{AppPascal}User` (user allowlist and profiles)
-- **S3 Bucket**: `{stage}-{app-name}-webapp` (static site hosting)
-- **Lambda Functions**: `{stage}-{app-name}-auth`, `{stage}-{app-name}-users`
-- **API Gateway v2**: HTTP API with CORS, routes for auth and user management
+Resources created per environment (stage), all using the `gzweb-` namespace prefix:
+- **DynamoDB Table**: `gzweb-{stage}-{app}-User` (user allowlist and profiles)
+- **S3 Bucket**: `gzweb-{stage}-{app}-webapp` (static site hosting)
+- **Lambda Functions**: `gzweb-{stage}-{app}-auth`, `gzweb-{stage}-{app}-users`
+- **API Gateway v2**: `gzweb-{stage}-{app}-api`, HTTP API with CORS
 - **CloudFront Distribution**: HTTPS delivery of S3 content, SPA error routing
 - **Seed Admin User**: Custom Resource that inserts the first admin on stack creation
+- **Tags**: All resources tagged with `gz:namespace=gzweb`, `gz:app={app}`, `gz:stage={stage}`
 
 CDK context parameters (passed via `--context`):
 - `stage`: Environment name (dev, prod, etc.)
@@ -119,7 +120,7 @@ A typical feature touches all three packages. Here is the sequence:
 
 1. **Define types**: Add interfaces to `lambda/shared/types.ts`. Mirror relevant types in `webapp/src/lib/types.ts`.
 
-2. **Create DynamoDB table** (if needed): Add a `dynamodb.Table` construct in the CDK stack. Use `appTable()` naming convention, PAY_PER_REQUEST billing, RETAIN removal policy.
+2. **Create DynamoDB table** (if needed): Add a `dynamodb.Table` construct in the CDK stack. Use `gzweb-{stage}-{app}-{Table}` naming (the `appTable()` helper applies the prefix automatically), PAY_PER_REQUEST billing, RETAIN removal policy.
 
 3. **Create Lambda handler**: Add a new directory under `lambda/` with a `handler.ts`. Import shared helpers. Route by path and method. Return via `json()`.
 

@@ -81,24 +81,26 @@ The app reads secrets from AWS Systems Manager Parameter Store. You need to crea
 
 For **dev** environment:
 
+All SSM parameters use the `/gzweb/` namespace prefix. This is required for IAM scoping.
+
 ```bash
 # Google OAuth Client ID (plain text)
 aws ssm put-parameter \
-  --name "/your-app-name/dev/google_client_id" \
+  --name "/gzweb/your-app-name/dev/google_client_id" \
   --value "YOUR_GOOGLE_CLIENT_ID_HERE" \
   --type String \
   --profile gz-dev
 
 # Google OAuth Client Secret (encrypted)
 aws ssm put-parameter \
-  --name "/your-app-name/dev/google_client_secret" \
+  --name "/gzweb/your-app-name/dev/google_client_secret" \
   --value "YOUR_GOOGLE_CLIENT_SECRET_HERE" \
   --type SecureString \
   --profile gz-dev
 
 # JWT signing secret (generate a random one)
 aws ssm put-parameter \
-  --name "/your-app-name/dev/jwt_secret" \
+  --name "/gzweb/your-app-name/dev/jwt_secret" \
   --value "$(openssl rand -base64 32)" \
   --type SecureString \
   --profile gz-dev
@@ -106,7 +108,13 @@ aws ssm put-parameter \
 
 Replace `your-app-name` with the subdomain slug you chose in the setup wizard.
 
-Repeat for **prod** (using `--profile gz-prod` and `/your-app-name/prod/...` paths). You can use the same Google Client ID and Secret for all environments, or create separate ones.
+Repeat for **prod** (using `--profile gz-prod` and `/gzweb/your-app-name/prod/...` paths). You can use the same Google Client ID and Secret for all environments, or create separate ones.
+
+If any of these commands fail with `AccessDenied`, your IAM user is probably not in the `GzWebappDevelopers` group. Ask an AWS admin to run:
+
+```bash
+./scripts/admin/setup-iam.sh --profile gz-{env} --add-user gz_{your-username}_cli
+```
 
 ## Step 6: First Deploy to Dev
 
@@ -151,7 +159,13 @@ npx cdk bootstrap aws://336507940372/us-east-1 --profile gz-dev
 ```
 
 ### "Parameter not found" error during login
-You have not created the SSM parameters yet. Go back to Step 5.
+You have not created the SSM parameters yet. Go back to Step 5. Make sure the parameter paths start with `/gzweb/` (not just `/your-app-name/`).
+
+### "AccessDenied" when running aws ssm, aws s3, or aws cloudfront commands
+Your IAM user is not in the `GzWebappDevelopers` group. Ask an AWS admin to run:
+```bash
+./scripts/admin/setup-iam.sh --profile gz-{env} --add-user gz_{your-username}_cli
+```
 
 ### "Access restricted to authorized domain accounts"
 The Google account you are signing in with is not from an allowed email domain. Check the `ALLOWED_DOMAINS` setting in the CDK stack.

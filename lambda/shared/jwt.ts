@@ -18,7 +18,7 @@ async function getSecret(): Promise<string> {
   const stage = process.env.STAGE || 'dev';
   const result = await ssm.send(
     new GetParameterCommand({
-      Name: `/{{APP_NAME}}/${stage}/jwt_secret`,
+      Name: `/gzweb/{{APP_NAME}}/${stage}/jwt_secret`,
       WithDecryption: true,
     }),
   );

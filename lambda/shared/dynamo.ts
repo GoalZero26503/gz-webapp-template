@@ -17,9 +17,9 @@ export const docClient = DynamoDBDocumentClient.from(client, {
 
 const stage = process.env.STAGE || 'dev';
 
-/** Resolve app table name: {stage}{{APP_NAME_PASCAL}}{name} */
+/** Resolve app table name: gzweb-{stage}-{app}-{name} */
 export function appTable(name: string): string {
-  return `${stage}{{APP_NAME_PASCAL}}${name}`;
+  return `gzweb-${stage}-{{APP_NAME}}-${name}`;
 }
 
 export async function getItem<T>(tableName: string, key: Record<string, NativeAttributeValue>): Promise<T | null> {

@@ -21,6 +21,15 @@ The user may provide an environment name as an argument (e.g. `/gz:webapp:deploy
 | stage | gz-stage | 678658412915 |
 | prod | gz-prod | 520397908078 |
 
+## IAM Requirements
+
+Developers must be in the `GzWebappDevelopers` IAM group. All deploy operations are scoped to the `gzweb-*` namespace (S3 buckets, Lambda functions, DynamoDB tables, SSM parameters under `/gzweb/*`, etc.). If any AWS operation fails with `AccessDenied`:
+
+1. Verify the user is in the group: `aws iam list-groups-for-user --user-name {username} --profile gz-{env}`
+2. If not, ask an admin to run: `./scripts/admin/setup-iam.sh --profile gz-{env} --add-user {username}`
+
+**Never suggest inline IAM policies or ad-hoc permission grants.** The namespace-scoped group is the only supported path.
+
 ## Pre-Deploy Validation
 
 Before deploying, run these checks. Stop and report if any fail.

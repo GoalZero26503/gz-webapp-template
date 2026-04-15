@@ -5,6 +5,7 @@
 @.agents/docs/api.md
 @.agents/docs/deploy.md
 @.agents/docs/conventions.md
+@.agents/docs/aws-namespace.md
 
 ## Overview
 
@@ -33,6 +34,7 @@ This is a Goal Zero internal webapp built from the [gz-webapp-template](https://
 2. New pages go in `webapp/src/pages/` and must be added to the Routes in `App.tsx`.
 3. New API routes need: Lambda handler in `lambda/`, CDK route in `cdk/lib/app-stack.ts`, and client method in `webapp/src/lib/api.ts`.
 4. DynamoDB table names use the `appTable()` helper from `lambda/shared/dynamo.ts`.
-5. Secrets go in SSM Parameter Store at `/{{APP_NAME}}/{stage}/{param}`. Never hardcode secrets.
+5. Secrets go in SSM Parameter Store at `/gzweb/{{APP_NAME}}/{stage}/{param}`. Never hardcode secrets.
 6. CSS uses Tailwind classes for layout/spacing and CSS custom properties (in index.css) for brand colors.
 7. Keep `.agents/docs/` and `docs/` up to date when making structural changes.
+8. **All AWS resources MUST use the `gzweb-` namespace prefix** (e.g., `gzweb-{stage}-{{APP_NAME}}-webapp`). All SSM parameters MUST use the `/gzweb/{{APP_NAME}}/{stage}/*` prefix. This namespace is how IAM scopes developer access; any resource without the prefix will be inaccessible to webapp developers. See `.agents/docs/aws-namespace.md`.

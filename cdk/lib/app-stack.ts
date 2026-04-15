@@ -28,11 +28,19 @@ export class AppStack extends cdk.Stack {
     const lambdaDir = path.join(__dirname, '..', '..', 'lambda');
 
     // ─────────────────────────────────────────────
+    // Tags: gzweb namespace (scoped IAM access)
+    // ─────────────────────────────────────────────
+
+    cdk.Tags.of(this).add('gz:namespace', 'gzweb');
+    cdk.Tags.of(this).add('gz:app', '{{APP_NAME}}');
+    cdk.Tags.of(this).add('gz:stage', stage);
+
+    // ─────────────────────────────────────────────
     // DynamoDB: App User Table
     // ─────────────────────────────────────────────
 
     const appUserTable = new dynamodb.Table(this, 'AppUserTable', {
-      tableName: `${stage}{{APP_NAME_PASCAL}}User`,
+      tableName: `gzweb-${stage}-{{APP_NAME}}-User`,
       partitionKey: { name: 'email', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.RETAIN,
@@ -44,7 +52,7 @@ export class AppStack extends cdk.Stack {
     // ─────────────────────────────────────────────
 
     const webappBucket = new s3.Bucket(this, 'WebappBucket', {
-      bucketName: `${stage}-{{APP_NAME}}-webapp`,
+      bucketName: `gzweb-${stage}-{{APP_NAME}}-webapp`,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
@@ -67,7 +75,7 @@ export class AppStack extends cdk.Stack {
     }
 
     const authFn = new NodejsFunction(this, 'AuthFn', {
-      functionName: `${stage}-{{APP_NAME}}-auth`,
+      functionName: `gzweb-${stage}-{{APP_NAME}}-auth`,
       entry: path.join(lambdaDir, 'auth', 'handler.ts'),
       handler: 'handler',
       runtime: Runtime.NODEJS_20_X,
@@ -80,14 +88,14 @@ export class AppStack extends cdk.Stack {
         NODE_OPTIONS: '--enable-source-maps',
         ALLOWED_DOMAINS: 'bioliteenergy.com,goalzero.com',
         ALLOWED_REDIRECT_URIS: allowedRedirectUris.join(','),
-        SSM_GOOGLE_CLIENT_ID: `/{{APP_NAME}}/${stage}/google_client_id`,
-        SSM_GOOGLE_CLIENT_SECRET: `/{{APP_NAME}}/${stage}/google_client_secret`,
+        SSM_GOOGLE_CLIENT_ID: `/gzweb/{{APP_NAME}}/${stage}/google_client_id`,
+        SSM_GOOGLE_CLIENT_SECRET: `/gzweb/{{APP_NAME}}/${stage}/google_client_secret`,
       },
       bundling: sharedBundling,
     });
 
     const usersFn = new NodejsFunction(this, 'UsersFn', {
-      functionName: `${stage}-{{APP_NAME}}-users`,
+      functionName: `gzweb-${stage}-{{APP_NAME}}-users`,
       entry: path.join(lambdaDir, 'users', 'handler.ts'),
       handler: 'handler',
       runtime: Runtime.NODEJS_20_X,
@@ -111,7 +119,7 @@ export class AppStack extends cdk.Stack {
     authFn.addToRolePolicy(new iam.PolicyStatement({
       actions: ['ssm:GetParameter'],
       resources: [
-        `arn:aws:ssm:${this.region}:${this.account}:parameter/{{APP_NAME}}/${stage}/*`,
+        `arn:aws:ssm:${this.region}:${this.account}:parameter/gzweb/{{APP_NAME}}/${stage}/*`,
       ],
     }));
 
@@ -120,7 +128,7 @@ export class AppStack extends cdk.Stack {
     usersFn.addToRolePolicy(new iam.PolicyStatement({
       actions: ['ssm:GetParameter'],
       resources: [
-        `arn:aws:ssm:${this.region}:${this.account}:parameter/{{APP_NAME}}/${stage}/jwt_secret`,
+        `arn:aws:ssm:${this.region}:${this.account}:parameter/gzweb/{{APP_NAME}}/${stage}/jwt_secret`,
       ],
     }));
 
@@ -129,7 +137,7 @@ export class AppStack extends cdk.Stack {
     // ─────────────────────────────────────────────
 
     const httpApi = new apigwv2.HttpApi(this, 'AppApi', {
-      apiName: `${stage}-{{APP_NAME}}-api`,
+      apiName: `gzweb-${stage}-{{APP_NAME}}-api`,
       corsPreflight: {
         allowOrigins: ['*'],
         allowMethods: [

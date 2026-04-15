@@ -9,10 +9,10 @@
 | Functions / variables | camelCase | `getStoredAuth()`, `const appUser` |
 | Types / interfaces | PascalCase | `AppUser`, `Permission` |
 | Constants | UPPER_SNAKE_CASE | `APP_ROLES`, `ROLE_HIERARCHY` |
-| DynamoDB table names | `{stage}{AppPascal}{TableName}` | `devFleetTrackerUser` |
-| Lambda function names | `{stage}-{app-name}-{handler}` | `dev-fleet-tracker-auth` |
-| S3 bucket names | `{stage}-{app-name}-{purpose}` | `dev-fleet-tracker-webapp` |
-| SSM parameter paths | `/{app-name}/{stage}/{param}` | `/fleet-tracker/dev/jwt_secret` |
+| DynamoDB table names | `gzweb-{stage}-{app}-{TableName}` | `gzweb-dev-fleet-tracker-User` |
+| Lambda function names | `gzweb-{stage}-{app}-{handler}` | `gzweb-dev-fleet-tracker-auth` |
+| S3 bucket names | `gzweb-{stage}-{app}-{purpose}` | `gzweb-dev-fleet-tracker-webapp` |
+| SSM parameter paths | `/gzweb/{app}/{stage}/{param}` | `/gzweb/fleet-tracker/dev/jwt_secret` |
 
 ## Lambda Handlers
 
@@ -84,7 +84,7 @@ Use the `appTable()` helper from `lambda/shared/dynamo.ts`:
 
 ```typescript
 const TABLE = appTable('Device');
-// Resolves to: {stage}{AppPascal}Device (e.g. devFleetTrackerDevice)
+// Resolves to: gzweb-{stage}-{app}-Device (e.g. gzweb-dev-fleet-tracker-Device)
 ```
 
 ### CDK Table Definitions
@@ -96,7 +96,7 @@ New tables should always use:
 
 ```typescript
 const deviceTable = new dynamodb.Table(this, 'DeviceTable', {
-  tableName: `${stage}${appPascal}Device`,
+  tableName: `gzweb-${stage}-${appSlug}-Device`,
   partitionKey: { name: 'deviceId', type: dynamodb.AttributeType.STRING },
   billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
   removalPolicy: cdk.RemovalPolicy.RETAIN,

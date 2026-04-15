@@ -11,7 +11,7 @@ const seedAdminEmail = app.node.tryGetContext('seedAdminEmail') || '{{SEED_ADMIN
 const domainName = app.node.tryGetContext('domainName') as string | undefined;
 const certificateArn = app.node.tryGetContext('certificateArn') as string | undefined;
 
-new AppStack(app, `{{APP_NAME_PASCAL}}-${stage}`, {
+new AppStack(app, `GzWeb-{{APP_NAME_PASCAL}}-${stage}`, {
   env: { account, region: 'us-east-1' },
   stage,
   seedAdminEmail,

@@ -34,7 +34,7 @@ cd cdk && npx cdk deploy \
   --require-approval never
 ```
 
-The stack name follows the pattern `{AppPascal}-{stage}` (e.g. `FleetTracker-dev`).
+The stack name follows the pattern `GzWeb-{AppPascal}-{stage}` (e.g. `GzWeb-FleetTracker-dev`).
 
 CDK outputs after deploy:
 - `ApiUrl`: HTTP API Gateway endpoint (e.g. `https://abc123.execute-api.us-east-1.amazonaws.com`)
@@ -87,19 +87,19 @@ Before deploying for the first time to a new environment:
 2. **Create SSM parameters**:
    ```bash
    aws ssm put-parameter \
-     --name "/{app-name}/{env}/google_client_id" \
+     --name "/gzweb/{app-name}/{env}/google_client_id" \
      --value "YOUR_GOOGLE_CLIENT_ID" \
      --type String \
      --profile gz-{env}
 
    aws ssm put-parameter \
-     --name "/{app-name}/{env}/google_client_secret" \
+     --name "/gzweb/{app-name}/{env}/google_client_secret" \
      --value "YOUR_GOOGLE_CLIENT_SECRET" \
      --type SecureString \
      --profile gz-{env}
 
    aws ssm put-parameter \
-     --name "/{app-name}/{env}/jwt_secret" \
+     --name "/gzweb/{app-name}/{env}/jwt_secret" \
      --value "$(openssl rand -base64 32)" \
      --type SecureString \
      --profile gz-{env}
@@ -144,7 +144,7 @@ Before deploying for the first time to a new environment:
 ### CDK Rollback
 If a CDK deploy causes issues, CloudFormation can roll back:
 ```bash
-aws cloudformation rollback-stack --stack-name {AppPascal}-{env} --profile gz-{env}
+aws cloudformation rollback-stack --stack-name GzWeb-{AppPascal}-{env} --profile gz-{env}
 ```
 
 Or redeploy a previous known-good commit:
@@ -193,3 +193,7 @@ To use a custom domain (e.g. `fleet-tracker.goalzeroapp.com`):
 
 - **Dev/Test/etc.**: `{subdomain}-{env}.goalzeroapp.com` (e.g. `fleet-tracker-dev.goalzeroapp.com`)
 - **Production**: `{subdomain}.goalzeroapp.com` (e.g. `fleet-tracker.goalzeroapp.com`)
+
+## IAM Requirements
+
+Webapp developers must be in the `GzWebappDevelopers` IAM group (see `scripts/admin/setup-iam.sh`). This group grants scoped access to `gzweb-*` resources only. See `.agents/docs/aws-namespace.md` for the full access model.
