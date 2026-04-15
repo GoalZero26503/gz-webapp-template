@@ -10,13 +10,27 @@ Run the five phases below in sequence. Do not skip any phase.
 
 ---
 
+## Phase 0: Generate a Fun Default Slug
+
+Before the interview, generate a random 3-word slug by running:
+
+```bash
+./scripts/random-slug.sh
+```
+
+Capture the output (e.g. `swimming-ancient-shrubbery`) and use it as the default for the **Subdomain slug** question in Phase 1. The user can accept this whimsical default or type their own kebab-case slug.
+
+This is a nice touch — if the user is building a throwaway proof-of-concept or just wants a memorable name, they can accept the suggestion. For real production apps they will usually type a meaningful name.
+
+---
+
 ## Phase 1: Interview
 
 Ask the user the following questions in a single grouped prompt. Provide the defaults shown below so they can accept or override.
 
 **App Basics**
 - **App name** (human-readable display name, e.g. "Fleet Tracker" or "Firmware Portal"):
-- **Subdomain slug** (kebab-case, used for S3 buckets and DNS, e.g. "fleet-tracker"):
+- **Subdomain slug** (kebab-case, used for S3 buckets and DNS). Default: `{random-slug-from-phase-0}`. Accept the default or enter your own (e.g. "fleet-tracker"):
 - **Short description** (one sentence for README/docs):
 
 **AWS Configuration**
